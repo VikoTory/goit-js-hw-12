@@ -39,6 +39,7 @@ async function onSubmitForm(e) {
 
   try {
     currentSearch = symbol;
+    currentPage = 1;
     const { data } = await getPicture(currentSearch, currentPage);
     renderPictures(data.hits);
 
@@ -49,6 +50,7 @@ async function onSubmitForm(e) {
         backgroundColor: '#EF4040',
         messageColor: '#FAFAFB',
       });
+      hideLoadBtn();
     } else {
       cardHeight = getCardHeight();
       smoothScroll();
