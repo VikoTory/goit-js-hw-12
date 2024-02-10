@@ -23,9 +23,9 @@ refs.loadBtn.addEventListener('click', onLoadMoreBtn);
 
 async function onSubmitForm(e) {
   e.preventDefault();
-  const symbol = e.target.elements.query.value;
+  const symbol = e.target.elements.query.value.trim();
 
-  if (!symbol.trim()) {
+  if (!symbol) {
     iziToast.warning({
       message: 'Field can not be empty',
       position: 'topRight',
@@ -43,7 +43,7 @@ async function onSubmitForm(e) {
     const { data } = await getPicture(currentSearch, currentPage);
     renderPictures(data.hits);
 
-    if (data.hits.length === 0) {
+    if (data.totalHits === 0) {
       iziToast.error({
         message: 'Sorry, there are no images matching your search query. Please try again!',
         position: 'topRight',
@@ -54,7 +54,12 @@ async function onSubmitForm(e) {
     } else {
       cardHeight = getCardHeight();
       smoothScroll();
-      showLoadBtn();
+      if (data.totalHits <= currentPage * 15) {
+        hideLoadBtn();
+      } else {
+        showLoadBtn();
+      }
+      
     }
   } catch (error) {
     console.error(error);
@@ -75,11 +80,15 @@ async function onLoadMoreBtn() {
 
     if (data.hits.length === 0) {
       showEndMessage();
+
     } else {
       appendPictures(data.hits);
       cardHeight = getCardHeight();
       smoothScroll();
-      showLoadBtn();
+      if (data.totalHits <= currentPage * 15) {
+        hideLoadBtn();
+        showEndMessage();
+      }
     }
   } catch (error) {
     console.error(error);
@@ -113,7 +122,7 @@ async function getPicture(symbol, page) {
     orientation: 'horizontal',
     safesearch: true,
     page: page,
-    per_page: 40,
+    per_page: 15,
   };
   const url = `${BASE_URL}${END_POINT}?${new URLSearchParams(params)}`;
 
